@@ -56,8 +56,8 @@ function Sidebar({ menuOpen, toggleMenu }) {
         {(usuario?.rol === "gerente" || usuario?.rol === "programador") && (
           <>
             <li><Link to="/crear-usuario">Crear Usuario</Link></li>
-            <li><Link to="/vendedores">Vendedores</Link></li>
-            <li><Link to="/compradores">Compradores</Link></li>
+            <li><Link to="/vendedores">Quien me lo Vendio</Link></li>
+            <li><Link to="/compradores">Quien me lo compro</Link></li>
             <li><Link to="/colaboradores">Colaboradores</Link></li>
             <li><Link to="/carros-predio">Carros Predio</Link></li>
             <li><Link to="/gastos">Gastos</Link></li>
