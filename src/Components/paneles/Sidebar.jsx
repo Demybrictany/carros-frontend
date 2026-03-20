@@ -56,22 +56,22 @@ function Sidebar({ menuOpen, toggleMenu }) {
         {(usuario?.rol === "gerente" || usuario?.rol === "programador") && (
           <>
             <li><Link to="/crear-usuario">Crear Usuario</Link></li>
-            <li><Link to="/vendedores">Quien me lo Vendio</Link></li>
-            <li><Link to="/compradores">Quien me lo compro</Link></li>
             <li><Link to="/colaboradores">Colaboradores</Link></li>
+            <li><Link to="/vendedores">Me lo Vendio</Link></li>
             <li><Link to="/carros-predio">Carros Predio</Link></li>
-            <li><Link to="/gastos">Gastos</Link></li>
+            <li><Link to="/compradores">Me lo compro</Link></li>
             <li><Link to="/ventas">Ventas</Link></li>
+            <li><Link to="/gastos">Gastos</Link></li>
             <li><Link to="/buscar">Busquedas</Link></li>
-            <li><Link to="/usuarios">Usuarios</Link></li>
             <li><Link to="/estadisticas">Estadisticas</Link></li>
+            <li><Link to="/usuarios">Usuarios</Link></li>
           </>
         )}
 
         {usuario?.rol === "colaborador" && (
           <>
-            <li><Link to="/vendedores">Quien me lo Vendio</Link></li>
-            <li><Link to="/compradores">Quien me lo compro</Link></li>
+            <li><Link to="/vendedores">Me lo Vendio</Link></li>
+            <li><Link to="/compradores">Me lo compro</Link></li>
             <li><Link to="/carros-predio">Carros Predio</Link></li>
             <li><Link to="/gastos">Gastos</Link></li>
             <li><Link to="/ventas">Ventas</Link></li>
