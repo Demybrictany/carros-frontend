@@ -292,15 +292,9 @@ function CarroPredioPage() {
             ))}
           </select>
 
-          <label>Comprador:</label>
-          <select
-            value={Id_Compra}
-            disabled
-            style={{ backgroundColor: "#2e3b4e", color: "#ccc" }}
-          >
-            <option value="">
-              {Id_Compra ? "Comprador asignado en una venta" : "Sin comprador"}
-            </option>
+          <label>Comprador (opcional):</label>
+          <select value={Id_Compra} onChange={(e) => setCompra(e.target.value)}>
+            <option value="">Sin comprador</option>
             {compradores.map((c) => (
               <option key={c.Id_Compra} value={c.Id_Compra}>
                 {c.Nombre} - {c.DPI}
