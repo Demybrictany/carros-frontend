@@ -14,7 +14,6 @@ function CarroPredioPage() {
   const [modalData, setModalData] = useState(null);
 
   const [vendedores, setVendedores] = useState([]);
-  const [compradores, setCompradores] = useState([]);
   const [duenosCarro, setDuenosCarro] = useState([]);
 
   const [busqueda, setBusqueda] = useState("");
@@ -34,7 +33,7 @@ function CarroPredioPage() {
 
   const [Id_Vendedor, setVendedor] = useState("");
   const [Id_Dueno_Carro, setDuenoCarro] = useState("");
-  const [Id_Compra, setCompra] = useState("");
+  const [CompradorActual, setCompradorActual] = useState("Sin comprador");
   const [Tiempo_Traspaso, setTraspaso] = useState("");
 
   const cargarCarros = () => {
@@ -51,13 +50,6 @@ function CarroPredioPage() {
       .catch(() => setVendedores([]));
   };
 
-  const cargarCompradores = () => {
-    fetch(`${BASE_URL}/compradores`)
-      .then((res) => res.json())
-      .then((data) => setCompradores(Array.isArray(data) ? data : []))
-      .catch(() => setCompradores([]));
-  };
-
   const cargarDuenosCarro = () => {
     fetch(`${BASE_URL}/dueno-carro`)
       .then((res) => res.json())
@@ -68,7 +60,6 @@ function CarroPredioPage() {
   useEffect(() => {
     cargarCarros();
     cargarVendedores();
-    cargarCompradores();
     cargarDuenosCarro();
   }, []);
 
@@ -94,7 +85,7 @@ function CarroPredioPage() {
     setColor("");
     setVendedor("");
     setDuenoCarro("");
-    setCompra("");
+    setCompradorActual("Sin comprador");
     setTraspaso("");
     setModalData(null);
   };
@@ -118,7 +109,6 @@ function CarroPredioPage() {
       Tiempo_Traspaso,
       Id_Vendedor: parseOptionalId(Id_Vendedor),
       Id_Dueno_Carro: parseOptionalId(Id_Dueno_Carro),
-      Id_Compra: parseOptionalId(Id_Compra),
     };
 
     console.log("BODY A ENVIAR:", body);
@@ -168,8 +158,11 @@ function CarroPredioPage() {
       c.IdDuenoCarro ??
       ""
     );
-
-    setCompra(c.Id_Compra ?? "");
+    setCompradorActual(
+      c.Comprador
+        ? `${c.Comprador.Nombre} - ${c.Comprador.DPI || c.Comprador.Dpi || ""}`
+        : "Sin comprador"
+    );
 
     const vendedorSeleccionado = vendedores.find(
       (v) =>
@@ -293,13 +286,8 @@ function CarroPredioPage() {
           </select>
 
           <label>Comprador (opcional):</label>
-          <select value={Id_Compra} onChange={(e) => setCompra(e.target.value)}>
-            <option value="">Sin comprador</option>
-            {compradores.map((c) => (
-              <option key={c.Id_Compra} value={c.Id_Compra}>
-                {c.Nombre} - {c.DPI}
-              </option>
-            ))}
+          <select value={CompradorActual} disabled>
+            <option value={CompradorActual}>{CompradorActual}</option>
           </select>
 
           <button className="btn-primary" onClick={guardar}>
