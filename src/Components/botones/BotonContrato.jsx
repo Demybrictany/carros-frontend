@@ -1,58 +1,74 @@
 import { useState } from "react";
 import { BASE_URL } from "../../config";
 
-
 const BotonContrato = ({ idVenta }) => {
   const API = `${BASE_URL}/contrato`;
 
   const [urlContrato, setUrlContrato] = useState(null);
   const [mostrarOpciones, setMostrarOpciones] = useState(false);
 
-  // ============================
-  //   GENERAR O REEMPLAZAR PDF
-  // ============================
-  const generarContrato = async () => {
-    const res = await fetch(`${API}/${idVenta}`);
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
+  const obtenerMensajeError = async (res) => {
+    const contentType = res.headers.get("content-type") || "";
 
-    setUrlContrato(url);
+    if (contentType.includes("application/json")) {
+      const data = await res.json().catch(() => ({}));
+      return data.error || data.detalle || "No se pudo generar el contrato.";
+    }
 
-    // Descargar automáticamente
+    const text = await res.text().catch(() => "");
+    return text || "No se pudo generar el contrato.";
+  };
+
+  const descargarBlob = (url) => {
     const link = document.createElement("a");
     link.href = url;
     link.download = `contrato_${idVenta}.pdf`;
     link.click();
-
-    alert("Contrato generado correctamente");
-    setMostrarOpciones(false);
   };
 
-  // ============================
-  //   CLICK AL BOTÓN PRINCIPAL
-  // ============================
-  const handleClick = () => {
-    if (!urlContrato) {
-      generarContrato(); // primera vez
-    } else {
-      setMostrarOpciones(true); // ya existe → abrir menú
+  const generarContrato = async () => {
+    try {
+      const res = await fetch(`${API}/${idVenta}`);
+
+      if (!res.ok) {
+        const mensaje = await obtenerMensajeError(res);
+        alert(mensaje);
+        return;
+      }
+
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("application/pdf")) {
+        alert("El servidor no devolvio un PDF valido.");
+        return;
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+
+      setUrlContrato(url);
+      descargarBlob(url);
+
+      alert("Contrato generado correctamente");
+      setMostrarOpciones(false);
+    } catch (error) {
+      console.error("Error generando contrato:", error);
+      alert("Error al conectar con el servidor para generar el contrato.");
     }
   };
 
-  // ============================
-  //   DESCARGAR ARCHIVO EXISTENTE
-  // ============================
-  const descargar = () => {
-    if (!urlContrato) return;
-    const link = document.createElement("a");
-    link.href = urlContrato;
-    link.download = `contrato_${idVenta}.pdf`;
-    link.click();
+  const handleClick = () => {
+    if (!urlContrato) {
+      generarContrato();
+    } else {
+      setMostrarOpciones(true);
+    }
   };
 
-  // ============================
-  //   IMPRIMIR ARCHIVO EXISTENTE
-  // ============================
+  const descargar = () => {
+    if (!urlContrato) return;
+    descargarBlob(urlContrato);
+  };
+
   const imprimir = () => {
     if (!urlContrato) return;
     window.open(urlContrato, "_blank");
@@ -73,12 +89,12 @@ const BotonContrato = ({ idVenta }) => {
           <div className="modal-content">
             <h3>Contrato ya generado</h3>
 
-            <button onClick={generarContrato}>🔄 Reemplazar contrato</button>
-            <button onClick={descargar}>📥 Descargar nuevamente</button>
-            <button onClick={imprimir}>🖨 Imprimir</button>
+            <button onClick={generarContrato}>Reemplazar contrato</button>
+            <button onClick={descargar}>Descargar nuevamente</button>
+            <button onClick={imprimir}>Imprimir</button>
 
             <button onClick={() => setMostrarOpciones(false)}>
-              ❌ Cancelar
+              Cancelar
             </button>
           </div>
         </div>

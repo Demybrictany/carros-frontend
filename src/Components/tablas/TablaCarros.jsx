@@ -13,6 +13,48 @@ function TablaCarros({ carros, seleccionar, refrescar }) {
     refrescar();
   };
 
+  const obtenerMensajeError = async (res) => {
+    const contentType = res.headers.get("content-type") || "";
+
+    if (contentType.includes("application/json")) {
+      const data = await res.json().catch(() => ({}));
+      return data.error || data.detalle || "No se pudo generar el contrato";
+    }
+
+    const text = await res.text().catch(() => "");
+    return text || "No se pudo generar el contrato";
+  };
+
+  const descargarContratoCompra = async (id) => {
+    try {
+      const res = await fetch(`${BASE_URL}/contrato-compra-carro/${id}`);
+
+      if (!res.ok) {
+        const mensaje = await obtenerMensajeError(res);
+        alert(mensaje);
+        return;
+      }
+
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("application/pdf")) {
+        alert("El servidor no devolvio un PDF valido.");
+        return;
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = `contrato_compra_${id}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error descargando contrato de compra:", error);
+      alert("Error al conectar con el servidor para generar el contrato.");
+    }
+  };
+
   return (
     <TablaDesplegable total={carros.length}>
       {(limite) => (
@@ -98,12 +140,7 @@ function TablaCarros({ carros, seleccionar, refrescar }) {
 
               <button
                 className="btn-contrato"
-                onClick={() =>
-                  window.open(
-                    `${BASE_URL}/contrato-compra-carro/${c.Id_Predio}`,
-                    "_blank"
-                  )
-                }
+                onClick={() => descargarContratoCompra(c.Id_Predio)}
               >
                 Descargar Contrato Compra
               </button>
