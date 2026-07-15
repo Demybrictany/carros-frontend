@@ -159,7 +159,7 @@ const compradoresFiltrados = compradores.filter((c) => {
       <h1>Gestión de Compradores</h1>
 
       <div className="form-box">
-        <h3>{Id_Compra ? "Editar Comprador" : "Nuevo Comprador"}</h3>
+        <h3>{Id_Compra ? "Editar Comprador" : "Comprador"}</h3>
 
         <input
           placeholder="Nombre"

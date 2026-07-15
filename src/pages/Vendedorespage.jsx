@@ -116,7 +116,7 @@ function VendedoresPage() {
       <h1>Gestion de Vendedores</h1>
 
       <div className="form-box">
-        <h3>{Id_Vendedor ? "Editar Vendedor" : "Nuevo Vendedor"}</h3>
+        <h3>{Id_Vendedor ? "Editar Vendedor" : "Vendedor"}</h3>
 
         <input placeholder="Nombre" value={Nombre} onChange={(e) => setNombre(e.target.value)} />
 

@@ -107,7 +107,7 @@ function DuenosCarroPage() {
       <h1>Gestion de Dueños del Carro</h1>
 
       <div className="form-box">
-        <h3>{Id_Dueno_Carro ? "Editar Dueño del Carro" : "Nuevo Dueño del Carro"}</h3>
+        <h3>{Id_Dueno_Carro ? "Editar Dueño del Carro" : "Dueño del Carro"}</h3>
 
         <input placeholder="Nombre del dueño" value={Nombre} onChange={(e) => setNombre(e.target.value)} />
 

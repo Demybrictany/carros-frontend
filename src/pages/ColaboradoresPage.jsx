@@ -140,7 +140,7 @@ function ColaboradoresPage() {
 
       <div className="form-box">
 
-        <h3>{Id_Colaborador ? "Editar Colaborador" : "Nuevo Colaborador"}</h3>
+        <h3>{Id_Colaborador ? "Editar Colaborador" : "Colaborador"}</h3>
 
         <input
           placeholder="Nombre"
