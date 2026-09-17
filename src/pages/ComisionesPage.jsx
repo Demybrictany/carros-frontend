@@ -9,6 +9,7 @@ function ComisionesPage() {
   const [carros, setCarros] = useState([]);
   const [listaColaboradores, setListaColaboradores] = useState([]);
   const [search, setSearch] = useState("");
+  const [mesReporte, setMesReporte] = useState(new Date().toISOString().slice(0, 7));
   const tabInicial = ["pendientes", "pagadas", "resumen", "carros"].includes(searchParams.get("tab"))
     ? searchParams.get("tab")
     : "pendientes";
@@ -214,6 +215,104 @@ function ComisionesPage() {
 
   const resumenColaboradores = obtenerResumenPorColaborador();
 
+  const obtenerMes = (fecha) => {
+    if (!fecha) return "";
+    const textoFecha = String(fecha);
+    if (/^\d{4}-\d{2}/.test(textoFecha)) return textoFecha.slice(0, 7);
+
+    const fechaConvertida = new Date(fecha);
+    return Number.isNaN(fechaConvertida.getTime())
+      ? ""
+      : fechaConvertida.toISOString().slice(0, 7);
+  };
+
+  const comisionesDelMes = todasLasComisiones.filter(
+    (comision) => obtenerMes(comision.fechaVenta) === mesReporte
+  );
+
+  const escaparCSV = (valor) => {
+    const texto = String(valor ?? "").replace(/"/g, '""');
+    return `"${texto}"`;
+  };
+
+  const descargarComisiones = () => {
+    const encabezados = ["Carro", "Fecha", "Persona", "Comision", "Pagada", "Marca manual"];
+    const filas = comisionesDelMes.map((comision) => [
+      comision.carro,
+      comision.fechaVenta ? new Date(comision.fechaVenta).toLocaleDateString() : "",
+      comision.persona,
+      comision.comision.toFixed(2),
+      comision.estado,
+      "",
+    ]);
+    const contenido = [encabezados, ...filas]
+      .map((fila) => fila.map(escaparCSV).join(","))
+      .join("\n");
+    const enlace = document.createElement("a");
+    enlace.href = URL.createObjectURL(new Blob([`\ufeff${contenido}`], { type: "text/csv;charset=utf-8;" }));
+    enlace.download = `comisiones-${mesReporte}.csv`;
+    enlace.click();
+    URL.revokeObjectURL(enlace.href);
+  };
+
+  const escaparHTML = (valor) => String(valor ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+  const imprimirComisiones = () => {
+    const ventana = window.open("", "_blank", "width=900,height=700");
+    if (!ventana) {
+      alert("Permite las ventanas emergentes para imprimir el reporte.");
+      return;
+    }
+
+    const filas = comisionesDelMes.map((comision) => `
+      <tr>
+        <td>${escaparHTML(comision.carro)}</td>
+        <td>${escaparHTML(comision.fechaVenta ? new Date(comision.fechaVenta).toLocaleDateString() : "")}</td>
+        <td>${escaparHTML(comision.persona)}</td>
+        <td class="amount">Q${comision.comision.toFixed(2)}</td>
+        <td class="check">&#x2610;</td>
+      </tr>
+    `).join("");
+
+    ventana.document.write(`
+      <!doctype html>
+      <html lang="es">
+        <head>
+          <title>Comisiones ${escaparHTML(mesReporte)}</title>
+          <style>
+            body { font-family: Arial, sans-serif; color: #111; margin: 28px; }
+            h1 { margin: 0 0 6px; font-size: 22px; }
+            p { margin: 0 0 18px; color: #555; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #555; padding: 9px; text-align: left; }
+            th { background: #eee; }
+            .amount { text-align: right; }
+            .check { text-align: center; font-size: 21px; width: 100px; }
+            @media print { body { margin: 12mm; } }
+          </style>
+        </head>
+        <body>
+          <h1>Reporte de comisiones</h1>
+          <p>Mes: ${escaparHTML(mesReporte)} | Total de registros: ${comisionesDelMes.length}</p>
+          <table>
+            <thead>
+              <tr><th>Carro</th><th>Fecha</th><th>Persona</th><th>Comision</th><th>Pagada (manual)</th></tr>
+            </thead>
+            <tbody>${filas || '<tr><td colspan="5">No hay comisiones para este mes.</td></tr>'}</tbody>
+          </table>
+        </body>
+      </html>
+    `);
+    ventana.document.close();
+    ventana.focus();
+    ventana.print();
+  };
+
   // Marcar comisión como pagada
   const marcarComoPagada = (fila) => {
     setModalPago(fila);
@@ -395,6 +494,35 @@ function ComisionesPage() {
             fontSize: "14px",
           }}
         />
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          flexWrap: "wrap",
+          marginBottom: "20px",
+          padding: "12px",
+          background: "#f5f7fa",
+          border: "1px solid #d9e1e8",
+          borderRadius: "6px",
+        }}
+      >
+        <label htmlFor="mes-reporte" style={{ fontWeight: "bold" }}>Reporte mensual:</label>
+        <input
+          id="mes-reporte"
+          type="month"
+          value={mesReporte}
+          onChange={(e) => setMesReporte(e.target.value)}
+          style={{ padding: "8px", border: "1px solid #bbb", borderRadius: "4px" }}
+        />
+        <button onClick={descargarComisiones} style={actionButtonStyle("#0d6efd")}>
+          Descargar CSV ({comisionesDelMes.length})
+        </button>
+        <button onClick={imprimirComisiones} style={actionButtonStyle("#495057")}>
+          Imprimir reporte
+        </button>
       </div>
 
       {/* TABS */}
